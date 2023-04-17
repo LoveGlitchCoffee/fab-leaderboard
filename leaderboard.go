@@ -63,7 +63,7 @@ func main() {
 		scrapeCallback(h, h.Request.URL.Query().Get("country"))
 	})
 
-	tickChannel := time.Tick(10 * time.Second)
+	tickChannel := time.Tick(24 * time.Hour)
 	const pages = 3 // always visit the top 150 rank, unless US
 
 	for next := range tickChannel {
