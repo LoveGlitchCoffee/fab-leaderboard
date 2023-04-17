@@ -12,11 +12,32 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+type Config struct {
+	RedisURL string
+}
+
+func configureRedis() *string {
+	data, read_err := os.ReadFile("./resources/config.yml")
+	if read_err != nil {
+		fmt.Println("Unable to read config.yml\n", read_err)
+		return nil
+	}
+	config := Config{}
+	parse_err := yaml.Unmarshal([]byte(data), &config)
+	if parse_err != nil {
+		fmt.Println("Unable to parse config.yml", parse_err)
+		return nil
+	}
+	return &config.RedisURL
+}
+
 var ctx = context.Background()
+
+var redisURL = *configureRedis()
 
 func scrapeCallback(table *colly.HTMLElement, country string) {
 	rdb := redis.NewClient(&redis.Options{
-		Addr:     "redis://default:fbc821c436db485b8e0a64517130a32a@fly-sultania.upstash.io", // "redis://default:fbc821c436db485b8e0a64517130a32a@fly-sultania.upstash.io"
+		Addr:     redisURL,
 		Password: "",
 		DB:       0,
 	})
@@ -50,15 +71,15 @@ func main() {
 
 	for next := range tickChannel {
 		fmt.Println(next)
-		data, read_err := os.ReadFile("./countries.yml")
+		data, read_err := os.ReadFile("./resources/countries.yml")
 		if read_err != nil {
-			fmt.Println("Unable to read conutries.yaml\n", read_err)
+			fmt.Println("Unable to read countries.yml\n", read_err)
 			continue
 		}
 		var countries []string
 		parse_err := yaml.Unmarshal([]byte(data), &countries)
 		if parse_err != nil {
-			fmt.Println("Unable to parse countries.yaml", parse_err)
+			fmt.Println("Unable to parse countries.yml", parse_err)
 			continue
 		}
 
