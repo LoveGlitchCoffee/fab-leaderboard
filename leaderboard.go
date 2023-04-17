@@ -13,13 +13,13 @@ import (
 )
 
 type Config struct {
-	RedisURL string
+	RedisURL string `yaml:"redisURL"`
 }
 
 func configureRedis() *string {
 	data, read_err := os.ReadFile("./resources/config.yml")
 	if read_err != nil {
-		fmt.Println("Unable to read config.yml\n", read_err)
+		fmt.Print("Unable to read config.yml\n", read_err)
 		return nil
 	}
 	config := Config{}
@@ -36,11 +36,8 @@ var ctx = context.Background()
 var redisURL = *configureRedis()
 
 func scrapeCallback(table *colly.HTMLElement, country string) {
-	rdb := redis.NewClient(&redis.Options{
-		Addr:     redisURL,
-		Password: "",
-		DB:       0,
-	})
+	opt, _ := redis.ParseURL(redisURL)
+	rdb := redis.NewClient(opt)
 
 	table.ForEach("tr", func(i int, row *colly.HTMLElement) {
 		if i != 0 { // first row is header
@@ -66,7 +63,7 @@ func main() {
 		scrapeCallback(h, h.Request.URL.Query().Get("country"))
 	})
 
-	tickChannel := time.Tick(24 * time.Hour)
+	tickChannel := time.Tick(10 * time.Second)
 	const pages = 3 // always visit the top 150 rank, unless US
 
 	for next := range tickChannel {
