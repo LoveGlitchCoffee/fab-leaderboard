@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gocolly/colly/v2"
@@ -36,13 +37,15 @@ var ctx = context.Background()
 var redisURL = *configureRedis()
 
 func scrapeCallback(table *colly.HTMLElement, country string) {
-	opt, _ := redis.ParseURL(redisURL)
-	rdb := redis.NewClient(opt)
+	//opt, _ := redis.ParseURL(redisURL)
+	opt := redis.Options{Addr: "localhost:6379"}
+	rdb := redis.NewClient(&opt)
 
 	table.ForEach("tr", func(i int, row *colly.HTMLElement) {
 		if i != 0 { // first row is header
 			data := row.ChildTexts("td")
-			rdb.HSet(ctx, country, data[1], data[0])
+			nameOnly := strings.Split(data[1], " (")
+			rdb.HSet(ctx, country, nameOnly[0], data[0]) // name: rank
 		}
 	})
 
@@ -63,7 +66,7 @@ func main() {
 		scrapeCallback(h, h.Request.URL.Query().Get("country"))
 	})
 
-	tickChannel := time.Tick(24 * time.Hour)
+	tickChannel := time.Tick(10 * time.Second)
 	const pages = 3 // always visit the top 150 rank, unless US
 
 	for next := range tickChannel {
