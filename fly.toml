@@ -9,4 +9,5 @@ processes = []
 [build]
   builder = "paketobuildpacks/builder:base"
   buildpacks = ["gcr.io/paketo-buildpacks/go"]
-  BP_KEEP_FILES = "countries.yml"
+[build.args]
+  BP_KEEP_FILES = "resources/*"

@@ -55,6 +55,7 @@ func scrapeCallback(table *colly.HTMLElement, country string) {
 
 func main() {
 	collector := colly.NewCollector()
+	collector.AllowURLRevisit = true
 
 	collector.OnRequest(func(r *colly.Request) {
 		fmt.Println("Requesting ", r.URL)
