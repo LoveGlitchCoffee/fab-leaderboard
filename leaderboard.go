@@ -37,9 +37,9 @@ func configureRedis() *string {
 var Ctx = context.Background()
 var RedisURL = *configureRedis()
 
-// var opt, _ := redis.ParseURL(redisURL)
-var Opt = redis.Options{Addr: "localhost:6379"}
-var RedisClient = redis.NewClient(&Opt)
+var Opt, _ = redis.ParseURL(RedisURL)
+//var Opt = redis.Options{Addr: "localhost:6379"}
+var RedisClient = redis.NewClient(Opt)
 
 // pick a random key from map
 func pick(m map[string]string, maxRand int) string {
