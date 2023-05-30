@@ -1,13 +1,18 @@
-# fly.toml file generated for fab-leaderboard on 2023-04-16T16:03:20+01:00
+# fly.toml app configuration file generated for fab-leaderboard on 2023-05-30T17:25:14+01:00
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
 
 app = "fab-leaderboard"
-kill_signal = "SIGINT"
-kill_timeout = 5
 primary_region = "lhr"
-processes = []
+kill_signal = "SIGINT"
+kill_timeout = "5s"
 
 [build]
   builder = "paketobuildpacks/builder:base"
   buildpacks = ["gcr.io/paketo-buildpacks/go"]
-[build.args]
-  BP_KEEP_FILES = "resources/*"
+  [build.args]
+    BP_KEEP_FILES = "resources/*"
+
+[env]
+  PRIMARY_REGION = "lhr"
